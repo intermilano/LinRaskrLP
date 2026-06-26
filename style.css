@@ -192,9 +192,16 @@ td input:focus{outline:2px solid #38bdf8;border-color:#38bdf8}
   align-items:center;
   justify-content:space-between;
   gap:8px;
-  padding:6px 0;
+  padding:8px 0;
   border-bottom:1px solid #14532d;
 }
+.db-project div{
+  display:grid;
+  gap:3px;
+}
+.db-project b{color:#f8fafc}
+.db-project small{color:#93c5fd}
+.db-project span{color:#bbf7d0}
 .db-project button{
   padding:5px 8px;
   border-radius:6px;

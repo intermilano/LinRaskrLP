@@ -98,10 +98,10 @@ function renderDbHistory(projects = [], actions = []) {
 
   projects.slice(0, 10).forEach(item => {
     const row = document.createElement('div');
-    const text = document.createElement('span');
+    const text = document.createElement('div');
     const button = document.createElement('button');
     row.className = 'db-project';
-    text.textContent = `#${item.id} ${item.reason || ''} ${new Date(item.created_at).toLocaleString('ru-RU')}`;
+    text.innerHTML = dbProjectHtml(item);
     button.type = 'button';
     button.textContent = 'Загрузить';
     button.onclick = () => loadProjectFromDb(item.id);
@@ -116,9 +116,55 @@ function renderDbHistory(projects = [], actions = []) {
 
   actions.slice(0, 8).forEach(item => {
     const div = document.createElement('div');
-    div.textContent = `#${item.id} ${item.type} ${new Date(item.created_at).toLocaleString('ru-RU')}`;
+    div.textContent = `#${item.id} ${actionName(item.type)} • ${new Date(item.created_at).toLocaleString('ru-RU')}`;
     box.append(div);
   });
+}
+
+function reasonName(reason = '') {
+  const value = String(reason);
+  if (value === 'manual_button') return 'Сохранено вручную';
+  if (value === 'compare_modes') return 'Сравнение DP/LP';
+  if (value.startsWith('best_mode_')) return `Лучший расчёт ${value.replace('best_mode_', '').toUpperCase()}`;
+  if (value.startsWith('calculate_')) return `Расчёт ${value.replace('calculate_', '').toUpperCase()}`;
+  if (value === 'create_report') return 'Создан отчёт';
+  if (value === 'download_project_json') return 'Сохранён JSON';
+  if (value === 'load_project_json') return 'Загружен JSON';
+  if (value === 'clear_all') return 'Очистка данных';
+  return value || 'Проект';
+}
+
+function actionName(type = '') {
+  const names = {
+    toggle_theme: 'смена темы',
+    save_database: 'сохранение в БД',
+    calculate: 'расчёт',
+    best_mode: 'лучший расчёт',
+    compare_modes: 'сравнение DP/LP',
+    load_project_database: 'загрузка из БД',
+    show_database_history: 'просмотр истории',
+    change_input: 'изменение ввода',
+    add_part_row: 'добавлена деталь',
+    add_stock_row: 'добавлена заготовка',
+    clear_all: 'очистка данных',
+    clear_solution: 'убрано решение',
+    clear_diagram: 'убрана графика',
+    print_pdf: 'печать/PDF',
+    create_report: 'создан отчёт'
+  };
+  return names[type] || type || 'действие';
+}
+
+function dbProjectHtml(item) {
+  const s = item.summary || {};
+  const title = `${reasonName(item.reason)}${s.mode ? ` (${s.mode})` : ''}`;
+  const date = new Date(item.created_at).toLocaleString('ru-RU');
+  return `
+    <b>#${item.id} — ${title}</b>
+    <small>${date}</small>
+    <span>Деталей: ${fmt(s.requested)} • сделано: ${fmt(s.done)} • не сделано: ${fmt(s.undone)}</span>
+    <span>Заготовок: ${fmt(s.stockUsed)} • расход: ${fmt(s.totalUsed)} мм • остаток: ${fmt(s.totalRest)} мм • отходы: ${String(s.wastePct ?? 0).replace('.', ',')}%</span>
+  `;
 }
 
 async function loadProjectFromDb(id) {

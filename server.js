@@ -63,6 +63,34 @@ function parseJson(value, fallback) {
   catch { return fallback; }
 }
 
+function projectSummary(row) {
+  const data = parseJson(row.data_json, {});
+  const result = parseJson(row.result_json, {});
+  const requested = Number(result.requested || 0);
+  const undone = Array.isArray(result.undone) ? result.undone.length : 0;
+  const cuts = Array.isArray(result.cuts) ? result.cuts : [];
+  const totalRest = cuts.reduce((sum, cut) => sum + Number(cut.rest || 0), 0);
+  const totalStock = cuts.reduce((sum, cut) => sum + Number(cut.stock || 0), 0);
+  const totalUsed = cuts.reduce((sum, cut) => sum + Number(cut.used || 0), 0);
+  const usefulLimit = Number(data.settings?.usefulRest || 0);
+  const usefulRest = cuts.reduce((sum, cut) => sum + (Number(cut.rest || 0) >= usefulLimit ? Number(cut.rest || 0) : 0), 0);
+  const cleanWaste = totalRest - usefulRest;
+  const wastePct = totalStock ? cleanWaste / totalStock * 100 : 0;
+  return {
+    requested,
+    done: Math.max(0, requested - undone),
+    undone,
+    stockUsed: cuts.length,
+    totalUsed,
+    totalRest,
+    cleanWaste,
+    wastePct: Number(wastePct.toFixed(2)),
+    stockRows: Array.isArray(data.stock) ? data.stock.length : 0,
+    partRows: Array.isArray(data.parts) ? data.parts.length : 0,
+    mode: String(result.mode || '').toUpperCase()
+  };
+}
+
 app.get('/api/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -86,9 +114,19 @@ app.post('/api/projects', async (req, res) => {
 
 app.get('/api/projects', async (req, res) => {
   const [rows] = await pool.query(
-    'SELECT id, name, reason, created_at, updated_at FROM projects ORDER BY id DESC LIMIT 50'
+    'SELECT id, name, reason, data_json, result_json, created_at, updated_at FROM projects ORDER BY id DESC LIMIT 50'
   );
-  res.json({ ok: true, items: rows });
+  res.json({
+    ok: true,
+    items: rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      reason: row.reason,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      summary: projectSummary(row)
+    }))
+  });
 });
 
 app.get('/api/projects/:id', async (req, res) => {
