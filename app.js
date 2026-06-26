@@ -830,13 +830,6 @@ $('addStock').onclick = () => { addRow('stockTable', '', '', true); clearResults
 $('addPart').onclick = () => { addRow('partsTable', '', '', true); clearResults(); logAction('add_part_row'); };
 $('calcDP').onclick = () => calc('dp');
 $('calcLP').onclick = () => calc('lp');
-$('display').onclick = displayResult;
-$('btnReset').onclick = () => {
-  if (confirm('Сбросить страницу и очистить текущие данные?')) {
-    logAction('reset_page');
-    location.reload();
-  }
-};
 $('checkInput').onclick = () => { const ok = validateBeforeCalc(); logAction('check_input', { ok }); };
 $('compareModes').onclick = compareModes;
 $('bestMode').onclick = bestMode;
@@ -861,10 +854,7 @@ $('clearDiagram').onclick = () => {
   toast('Графика убрана.', 'warn');
   logAction('clear_diagram');
 };
-$('btnPrint').onclick = $('exportPdf').onclick = () => { logAction('print_pdf'); window.print(); };
-$('createReport').onclick = report;
-$('btnSave').onclick = save;
-$('btnOpen').onclick = () => { logAction('open_project_dialog'); $('fileOpen').click(); };
+$('btnPrint').onclick = () => { logAction('print_pdf'); window.print(); };
 $('btnTheme').onclick = () => { toggleTheme(); logAction('toggle_theme', { theme: document.body.classList.contains('light-theme') ? 'light' : 'dark' }); };
 $('fileOpen').onchange = e => {
   const f = e.target.files[0];
