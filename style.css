@@ -65,7 +65,7 @@ body.light-theme #checkInput,body.light-theme #compareModes,body.light-theme #be
 body.light-theme #calcDP,body.light-theme #calcLP,body.light-theme #display{background:linear-gradient(#e0f2fe,#bae6fd);color:#0c4a6e}
 body.light-theme #btnSave,body.light-theme #createReport,body.light-theme #exportPdf,body.light-theme #btnPrint,body.light-theme #saveDb,body.light-theme #dbHistory{background:linear-gradient(#dcfce7,#bbf7d0);color:#14532d}
 body.light-theme #clearAll,body.light-theme #clearSolution,body.light-theme #clearDiagram,body.light-theme #btnReset{background:linear-gradient(#fee2e2,#fecaca);color:#7f1d1d}
-body.light-theme .cards div,body.light-theme .cut-label,body.light-theme .diagram-bar{background:#fff;color:#0f172a;border-color:#d1d5db}
+body.light-theme .cards div,body.light-theme .diagram-bar{background:#fff;color:#0f172a;border-color:#d1d5db}
 body.light-theme .cards b{color:#0f172a}
 body.light-theme .remain tbody tr:nth-child(n+2){background:#ffd7b3}
 body.light-theme .solution tfoot td{background:#e8f8ed}
@@ -197,20 +197,8 @@ td input:focus{outline:2px solid #38bdf8;border-color:#38bdf8}
 
 .diagram{padding-bottom:14px}
 .diagram-row{
-  display:grid;
-  grid-template-columns:118px minmax(360px,1fr);
-  align-items:center;
-  gap:8px;
+  display:block;
   margin:10px 12px;
-}
-.cut-label{
-  background:#0f172a;
-  border:1px solid #334155;
-  border-radius:8px;
-  color:#dbeafe;
-  padding:6px 8px;
-  font:700 12px "JetBrains Mono",Consolas,monospace;
-  white-space:nowrap;
 }
 .diagram-bar{
   min-height:32px;
@@ -305,8 +293,7 @@ td input:focus{outline:2px solid #38bdf8;border-color:#38bdf8}
   .cards{padding:6px;gap:6px}
   .cards div{min-width:120px;padding:6px;background:white;border-color:#999}
   .cards span,.cards b{color:#111827}
-  .diagram-row{grid-template-columns:95px 1fr;margin:5px 0}
-  .cut-label{background:white;color:#111827;border-color:#999}
+  .diagram-row{margin:5px 0}
   .diagram-bar{background:white;border-color:#999}
   .rest{background:repeating-linear-gradient(135deg,#fff,#fff 5px,#ddd 6px,#ddd 10px)!important;color:#111827!important}
   #diagramFooter{color:#111827}

@@ -521,13 +521,10 @@ function diagram(g, kerf = 0) {
 
   g.forEach((x, i) => {
     const row = document.createElement('div');
-    const label = document.createElement('div');
     const bar = document.createElement('div');
     row.className = 'cutrow diagram-row';
-    label.className = 'cut-label';
-    label.textContent = `№${i + 1} • ${fmt(x.stock)} • ×${x.count}`;
     bar.className = 'bar diagram-bar';
-    bar.title = `Заготовка ${fmt(x.stock)} мм, используется ${fmt(x.used)} мм, остаток ${fmt(x.rest)} мм, количество ${x.count}`;
+    bar.title = `№${i + 1}: заготовка ${fmt(x.stock)} мм, используется ${fmt(x.used)} мм, остаток ${fmt(x.rest)} мм, количество ${x.count}`;
 
     x.items.forEach((p, idx) => {
       const d = document.createElement('div');
@@ -555,7 +552,7 @@ function diagram(g, kerf = 0) {
     rest.textContent = fmt(x.rest);
     rest.title = `Остаток ${fmt(x.rest)} мм`;
     bar.append(rest);
-    row.append(label, bar);
+    row.append(bar);
     box.append(row);
   });
   $('diagramFooter').textContent = g.length ? `Макс. остаток: ${fmt(maxRest)} мм • Суммарный остаток: ${fmt(totalRest)} мм` : '';
