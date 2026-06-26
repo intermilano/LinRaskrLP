@@ -33,7 +33,7 @@ async function initDb() {
       await pool.query(`
         CREATE TABLE IF NOT EXISTS projects (
           id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-          name VARCHAR(255) NOT NULL DEFAULT 'LinRaskrLP',
+          name VARCHAR(255) NOT NULL DEFAULT 'Раскрой Профиль',
           reason VARCHAR(100) NULL,
           data_json LONGTEXT NOT NULL,
           result_json LONGTEXT NULL,
@@ -101,7 +101,7 @@ app.get('/api/health', async (req, res) => {
 });
 
 app.post('/api/projects', async (req, res) => {
-  const name = String(req.body?.name || 'LinRaskrLP').slice(0, 255);
+  const name = String(req.body?.name || 'Раскрой Профиль').slice(0, 255);
   const reason = String(req.body?.reason || 'manual').slice(0, 100);
   const data = JSON.stringify(req.body?.data || {});
   const result = JSON.stringify(req.body?.result || {});
@@ -175,4 +175,4 @@ app.get('/api/actions', async (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 await initDb();
-app.listen(port, () => console.log(`LinRaskrLP listening on ${port}`));
+app.listen(port, () => console.log(`Раскрой Профиль listening on ${port}`));

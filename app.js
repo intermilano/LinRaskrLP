@@ -45,7 +45,7 @@ function logAction(type, payload = {}) {
 
 function projectPayload(reason) {
   return {
-    name: `LinRaskrLP ${new Date().toLocaleString('ru-RU')}`,
+    name: `Раскрой Профиль ${new Date().toLocaleString('ru-RU')}`,
     reason,
     data: data(),
     result: lastResult
@@ -705,7 +705,7 @@ function download(name, content, type) {
 }
 
 function save() {
-  download('LinRaskrLP-project.json', JSON.stringify(data(), null, 2), 'application/json');
+  download('Raskroy-Profile-project.json', JSON.stringify(data(), null, 2), 'application/json');
   toast('Проект сохранён.', 'ok');
   logAction('download_project_json');
   saveSnapshot('download_project_json');
@@ -735,7 +735,7 @@ function report() {
     return;
   }
   const lines = [
-    'LinRaskrLP — отчёт раскроя',
+    'Раскрой Профиль — отчёт раскроя',
     `Метод: ${(lastResult.mode || lastMode).toUpperCase()}`,
     `Время расчёта: ${lastResult.ms || 0} мс`,
     `Деталей: ${lastResult.requested || 0}`,
@@ -744,7 +744,7 @@ function report() {
     '',
     ...lastResult.cuts.map((c, i) => `${i + 1}. Заготовка ${c.stock} мм: ${c.items.join(' + ')}; остаток ${c.rest} мм`)
   ];
-  download('LinRaskrLP-report.txt', lines.join('\r\n'), 'text/plain;charset=utf-8');
+  download('Raskroy-Profile-report.txt', lines.join('\r\n'), 'text/plain;charset=utf-8');
   toast('Отчёт создан.', 'ok');
   logAction('create_report', { cuts: lastResult.cuts.length, undone: lastResult.undone.length });
   saveSnapshot('create_report');
@@ -868,7 +868,7 @@ $('fileOpen').onchange = e => {
   r.onerror = () => toast('Не удалось прочитать файл.', 'err');
   r.readAsText(f);
 };
-$('btnAbout').onclick = () => { toast('LinRaskrLP Local: автономный расчёт раскроя без Excel и макросов.', 'ok', 4200); logAction('about'); };
+$('btnAbout').onclick = () => { toast('Раскрой Профиль: расчет раскроя, остатков и отходов.', 'ok', 4200); logAction('about'); };
 
 document.addEventListener('keydown', e => {
   if (e.ctrlKey && e.key === 'Enter') {
