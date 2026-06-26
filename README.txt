@@ -9,7 +9,7 @@ LinRaskrLP Local
 Запуск через Docker:
 1. Откройте PowerShell в папке проекта.
 2. Выполните: docker compose up --build -d
-3. Откройте в браузере: http://localhost:8080
+3. Откройте в браузере: http://localhost:8081
 4. Остановить контейнер: docker compose down
 
 Использование:
