@@ -74,16 +74,63 @@ async function showDbHistory() {
     apiJson('/api/projects'),
     apiJson('/api/actions')
   ]);
-  const lines = [
-    `Проекты в БД: ${projects.items.length}`,
-    ...projects.items.slice(0, 8).map(x => `#${x.id} ${x.reason || ''} ${new Date(x.created_at).toLocaleString('ru-RU')}`),
-    '',
-    `Действия: ${actions.items.length}`,
-    ...actions.items.slice(0, 8).map(x => `#${x.id} ${x.type} ${new Date(x.created_at).toLocaleString('ru-RU')}`)
-  ];
-  showCheck(lines, 'ok');
+  renderDbHistory(projects.items, actions.items);
   toast('История БД загружена.', 'ok');
   logAction('show_database_history');
+}
+
+function renderDbHistory(projects = [], actions = []) {
+  const box = $('checkBox');
+  if (!box) return;
+  box.className = 'checkBox ok db-list';
+  box.replaceChildren();
+
+  const title = document.createElement('div');
+  title.className = 'db-title';
+  title.textContent = `Проекты в БД: ${projects.length}`;
+  box.append(title);
+
+  if (!projects.length) {
+    const empty = document.createElement('div');
+    empty.textContent = 'Сохранённых проектов пока нет.';
+    box.append(empty);
+  }
+
+  projects.slice(0, 10).forEach(item => {
+    const row = document.createElement('div');
+    const text = document.createElement('span');
+    const button = document.createElement('button');
+    row.className = 'db-project';
+    text.textContent = `#${item.id} ${item.reason || ''} ${new Date(item.created_at).toLocaleString('ru-RU')}`;
+    button.type = 'button';
+    button.textContent = 'Загрузить';
+    button.onclick = () => loadProjectFromDb(item.id);
+    row.append(text, button);
+    box.append(row);
+  });
+
+  const actTitle = document.createElement('div');
+  actTitle.className = 'db-title';
+  actTitle.textContent = `Действия: ${actions.length}`;
+  box.append(actTitle);
+
+  actions.slice(0, 8).forEach(item => {
+    const div = document.createElement('div');
+    div.textContent = `#${item.id} ${item.type} ${new Date(item.created_at).toLocaleString('ru-RU')}`;
+    box.append(div);
+  });
+}
+
+async function loadProjectFromDb(id) {
+  const response = await apiJson(`/api/projects/${id}`);
+  const item = response.item;
+  loadData(item.data, { skipLog: true });
+  if (item.result && (item.result.cuts?.length || item.result.undone?.length)) {
+    lastResult = item.result;
+    render(lastResult);
+  }
+  toast(`Проект #${id} загружен из БД.`, 'ok');
+  logAction('load_project_database', { id });
 }
 
 function toast(message, type = 'ok', timeout = 3200) {
@@ -618,7 +665,7 @@ function save() {
   saveSnapshot('download_project_json');
 }
 
-function loadData(d) {
+function loadData(d, options = {}) {
   if (!d || typeof d !== 'object' || !Array.isArray(d.stock) || !Array.isArray(d.parts)) throw Error('Неверный формат файла проекта.');
   Object.entries(d.settings || {}).forEach(([id, v]) => {
     const e = $(id);
@@ -630,8 +677,10 @@ function loadData(d) {
   d.parts.forEach(r => addRow('partsTable', r.size, r.qty));
   clearResults();
   toast('Проект загружен.', 'ok');
-  logAction('load_project_json');
-  saveSnapshot('load_project_json');
+  if (!options.skipLog) {
+    logAction('load_project_json');
+    saveSnapshot('load_project_json');
+  }
 }
 
 function report() {
@@ -747,6 +796,7 @@ $('compareModes').onclick = compareModes;
 $('bestMode').onclick = bestMode;
 $('saveDb').onclick = () => saveToDatabase('manual_button').catch(() => {});
 $('dbHistory').onclick = () => showDbHistory().catch(() => {});
+$('loadDb').onclick = () => showDbHistory().catch(() => {});
 $('clearAll').onclick = () => {
   if (!confirm('Очистить все введённые данные и результат?')) return;
   $('stockTable').querySelector('tbody').replaceChildren();

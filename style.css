@@ -63,7 +63,7 @@ body.light-theme button,body.light-theme .top-actions button,body.light-theme .b
 }
 body.light-theme #checkInput,body.light-theme #compareModes,body.light-theme #bestMode{background:linear-gradient(#fff7d6,#ffe9a3);color:#111827}
 body.light-theme #calcDP,body.light-theme #calcLP,body.light-theme #display{background:linear-gradient(#e0f2fe,#bae6fd);color:#0c4a6e}
-body.light-theme #btnSave,body.light-theme #createReport,body.light-theme #exportPdf,body.light-theme #btnPrint,body.light-theme #saveDb,body.light-theme #dbHistory{background:linear-gradient(#dcfce7,#bbf7d0);color:#14532d}
+body.light-theme #btnSave,body.light-theme #createReport,body.light-theme #exportPdf,body.light-theme #btnPrint,body.light-theme #saveDb,body.light-theme #dbHistory,body.light-theme #loadDb{background:linear-gradient(#dcfce7,#bbf7d0);color:#14532d}
 body.light-theme #clearAll,body.light-theme #clearSolution,body.light-theme #clearDiagram,body.light-theme #btnReset{background:linear-gradient(#fee2e2,#fecaca);color:#7f1d1d}
 body.light-theme .cards div,body.light-theme .diagram-bar{background:#fff;color:#0f172a;border-color:#d1d5db}
 body.light-theme .cards b{color:#0f172a}
@@ -102,7 +102,7 @@ button,.top-actions button,.buttons button,button.small{
 button:hover{filter:brightness(1.12)}
 #checkInput,#compareModes,#bestMode{background:#3f2d10;border-color:#f59e0b;color:#fde68a}
 #calcDP,#calcLP,#display{background:#0c4a6e;border-color:#38bdf8;color:#e0f2fe}
-#btnSave,#createReport,#exportPdf,#btnPrint,#saveDb,#dbHistory{background:#14532d;border-color:#22c55e;color:#dcfce7}
+#btnSave,#createReport,#exportPdf,#btnPrint,#saveDb,#dbHistory,#loadDb{background:#14532d;border-color:#22c55e;color:#dcfce7}
 #clearAll,#clearSolution,#clearDiagram,#btnReset{background:#7f1d1d;border-color:#ef4444;color:#fee2e2}
 
 .sheet{
@@ -185,6 +185,24 @@ td input:focus{outline:2px solid #38bdf8;border-color:#38bdf8}
 .checkBox.ok{background:#052e16;border:1px solid #22c55e;color:#bbf7d0}
 .checkBox.warn{background:#422006;border:1px solid #f59e0b;color:#fde68a}
 .checkBox.bad{background:#450a0a;border:1px solid #ef4444;color:#fecaca}
+.db-list{max-height:360px;overflow:auto}
+.db-title{font-weight:800;margin-top:8px;color:#dcfce7}
+.db-project{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:6px 0;
+  border-bottom:1px solid #14532d;
+}
+.db-project button{
+  padding:5px 8px;
+  border-radius:6px;
+  font-size:12px;
+  background:#14532d;
+  border:1px solid #22c55e;
+  color:#dcfce7;
+}
 
 .remain tbody tr:nth-child(n+2){background:#2a1c0b}
 .solution table{font-size:13px}
