@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LinRaskrLP Local — расчёт раскроя</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">▦</span><div><b>LinRaskrLP Local</b><small>Локальный расчет раскроя без Excel и макросов</small></div></div>
+    <div class="top-actions">
+      <button id="btnOpen">📂 Открыть</button><button id="btnSave">💾 Сохранить</button><button id="btnReset">↻ Сброс</button><button id="btnPrint">🖨 Печать / PDF</button><button id="btnTheme">☀ День</button><button id="btnAbout">ⓘ О программе</button>
+      <input type="file" id="fileOpen" accept="application/json" hidden />
+    </div>
+  </header>
+
+  <main class="sheet">
+    <section class="panel have">
+      <h2>Есть <span>(заготовки)</span></h2>
+      <table id="stockTable"><thead><tr><th>№</th><th>Размер, мм</th><th>Кол-во</th><th>Использовано</th><th>Не использовано</th><th></th></tr></thead><tbody></tbody></table>
+      <button class="small" id="addStock">+ строка</button>
+      <p class="note">Если количество не указано, запас не ограничивается.</p>
+    </section>
+
+    <section class="panel remain">
+      <h2>Осталось</h2>
+      <table id="remainingTable"><thead><tr><th>Размер, мм</th><th>Кол-во</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section class="panel solution">
+      <h2>Решение <span>(раскройный план)</span></h2>
+      <table id="solutionTable">
+        <thead><tr><th>№</th><th>Размер<br>заготовки,<br>мм</th><th>Расход,<br>мм</th><th>Кол-во исп.<br>заготовок</th><th>Раскрой</th><th>Отходы,<br>мм (%)</th></tr></thead>
+        <tbody></tbody><tfoot></tfoot>
+      </table>
+      <div id="solutionNote"></div>
+    </section>
+
+    <section class="panel diagram">
+      <h2>Схема раскроя</h2>
+      <div id="diagramBox"></div>
+      <div id="diagramFooter"></div>
+    </section>
+
+    <section class="panel settings">
+      <h2>Настройки</h2>
+      <div id="checkBox" class="checkBox"></div>
+      <label>Ширина реза, мм <input id="kerf" type="number" value="10" min="0"></label>
+      <label>Кромка / запас<br>на заготовку, мм <input id="edge" type="number" value="10" min="0"></label>
+      <label>Деловой остаток, мм <input id="usefulRest" type="number" value="1000" min="0"></label>
+      <label class="check"><input id="useKerf" type="checkbox" checked> учитывать ширину реза</label>
+      <label class="check"><input id="useEdge" type="checkbox" checked> учитывать кромку/запас</label>
+      <label>Метод оптимизации <select id="method"><option value="normal">Нормально</option><option value="waste" selected>Оптимизация остатка</option><option value="fast">Быстро</option></select></label>
+      <label>Скорость оптимизации <select id="speed"><option value="normal">Нормальная</option><option value="slow" selected>Медленно</option><option value="fast">Быстро</option></select></label>
+    </section>
+
+    <section class="buttons">
+      <button id="checkInput">⚠ Проверить</button><button id="compareModes">⇄ Сравнить DP/LP</button><button id="bestMode">★ Лучший расчет</button>
+      <button id="calcDP">▦ Расчет DP</button><button id="calcLP">▦ Расчет LP</button><button id="clearAll">🧹 Очистить все</button><button id="display">👁 Отобразить</button><button id="exportPdf">📄 Экспорт в PDF</button><button id="createReport">📋 Создать отчет</button><button id="clearSolution">🗑 Убрать решение</button><button id="clearDiagram">🗑 Убрать графику</button>
+    </section>
+
+    <section class="panel need">
+      <h2>Нужно <span>(детали)</span></h2>
+      <table id="partsTable"><thead><tr><th>№</th><th>Размер, мм</th><th>Кол-во</th><th></th></tr></thead><tbody></tbody></table>
+      <button class="small" id="addPart">+ строка</button>
+    </section>
+
+    <section class="panel undone">
+      <h2>Не сделано <span>(остаток спроса)</span></h2>
+      <table id="undoneTable"><thead><tr><th>№</th><th>Размер, мм</th><th>Кол-во нужно</th><th>Кол-во сделано</th><th>Не сделано</th><th>Причина</th></tr></thead><tbody></tbody></table>
+      <div id="doneText">Все детали изготовлены.</div>
+    </section>
+
+    <section class="panel summary">
+      <h2>Итоговая сводка</h2>
+      <div class="cards"><div><span>Деталей всего</span><b id="totalParts">0</b></div><div><span>Заготовок исп.</span><b id="usedStocks">0</b></div><div><span>Расход с резом, мм</span><b id="totalUsed">0</b></div><div><span>Остаток, мм</span><b id="totalRest">0</b></div><div><span>Полезный остаток</span><b id="usefulRestTotal">0</b></div><div><span>Чистый отход</span><b id="cleanWaste">0</b></div><div><span>Отходы, %</span><b id="wastePct">0%</b></div></div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
