@@ -1,0 +1,7 @@
+.git
+.agents
+.xlsb_extract
+*.log
+*.zip
+*.ps1
+node_modules
