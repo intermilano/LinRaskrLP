@@ -16,6 +16,75 @@ const storageSet = (key, value) => {
   try { localStorage.setItem(key, value); }
   catch { /* storage can be blocked in some local browser modes */ }
 };
+const apiReady = () => location.protocol !== 'file:';
+
+async function apiJson(path, options = {}, silent = false) {
+  if (!apiReady()) {
+    if (!silent) toast('База работает только при запуске через Docker/сервер.', 'warn');
+    throw Error('API is not available on file://');
+  }
+  try {
+    const response = await fetch(path, {
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      ...options
+    });
+    if (!response.ok) throw Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (err) {
+    if (!silent) toast('База данных недоступна.', 'err');
+    throw err;
+  }
+}
+
+function logAction(type, payload = {}) {
+  apiJson('/api/actions', {
+    method: 'POST',
+    body: JSON.stringify({ type, payload })
+  }, true).catch(() => {});
+}
+
+function projectPayload(reason) {
+  return {
+    name: `LinRaskrLP ${new Date().toLocaleString('ru-RU')}`,
+    reason,
+    data: data(),
+    result: lastResult
+  };
+}
+
+async function saveToDatabase(reason = 'manual') {
+  const saved = await apiJson('/api/projects', {
+    method: 'POST',
+    body: JSON.stringify(projectPayload(reason))
+  });
+  toast(`Сохранено в БД №${saved.id}.`, 'ok');
+  logAction('save_database', { id: saved.id, reason });
+  return saved;
+}
+
+function saveSnapshot(reason) {
+  apiJson('/api/projects', {
+    method: 'POST',
+    body: JSON.stringify(projectPayload(reason))
+  }, true).catch(() => {});
+}
+
+async function showDbHistory() {
+  const [projects, actions] = await Promise.all([
+    apiJson('/api/projects'),
+    apiJson('/api/actions')
+  ]);
+  const lines = [
+    `Проекты в БД: ${projects.items.length}`,
+    ...projects.items.slice(0, 8).map(x => `#${x.id} ${x.reason || ''} ${new Date(x.created_at).toLocaleString('ru-RU')}`),
+    '',
+    `Действия: ${actions.items.length}`,
+    ...actions.items.slice(0, 8).map(x => `#${x.id} ${x.type} ${new Date(x.created_at).toLocaleString('ru-RU')}`)
+  ];
+  showCheck(lines, 'ok');
+  toast('История БД загружена.', 'ok');
+  logAction('show_database_history');
+}
 
 function toast(message, type = 'ok', timeout = 3200) {
   let box = $('toastBox');
@@ -278,9 +347,12 @@ function calculate(mode = lastMode, options = {}) {
 function calc(mode = lastMode) {
   try {
     if (!validateBeforeCalc()) return;
-    calculate(mode);
+    const r = calculate(mode);
+    logAction('calculate', { mode, cuts: r.cuts.length, undone: r.undone.length, ms: r.ms });
+    saveSnapshot(`calculate_${mode}`);
   } catch (e) {
     toast(e.message || 'Ошибка расчёта.', 'err');
+    logAction('calculate_error', { mode, message: e.message || 'Ошибка расчёта.' });
   }
 }
 
@@ -545,6 +617,8 @@ function download(name, content, type) {
 function save() {
   download('LinRaskrLP-project.json', JSON.stringify(data(), null, 2), 'application/json');
   toast('Проект сохранён.', 'ok');
+  logAction('download_project_json');
+  saveSnapshot('download_project_json');
 }
 
 function loadData(d) {
@@ -559,6 +633,8 @@ function loadData(d) {
   d.parts.forEach(r => addRow('partsTable', r.size, r.qty));
   clearResults();
   toast('Проект загружен.', 'ok');
+  logAction('load_project_json');
+  saveSnapshot('load_project_json');
 }
 
 function report() {
@@ -578,6 +654,8 @@ function report() {
   ];
   download('LinRaskrLP-report.txt', lines.join('\r\n'), 'text/plain;charset=utf-8');
   toast('Отчёт создан.', 'ok');
+  logAction('create_report', { cuts: lastResult.cuts.length, undone: lastResult.undone.length });
+  saveSnapshot('create_report');
 }
 
 function clearResults() {
@@ -624,6 +702,8 @@ function compareModes() {
   const best = isBetter(dp, lp) ? dp : lp;
   showCheck([scoreLine(dp), scoreLine(lp), `Лучше: ${best.mode.toUpperCase()}`], 'ok');
   toast(`Лучше: ${best.mode.toUpperCase()}`, 'ok');
+  logAction('compare_modes', { dp, lp, best: best.mode });
+  saveSnapshot('compare_modes');
 }
 
 function bestMode() {
@@ -633,12 +713,15 @@ function bestMode() {
   const best = isBetter(dp, lp) ? dp : lp;
   calculate(best.mode);
   showCheck([`Выбран лучший расчёт: ${best.mode.toUpperCase()}`, scoreLine(best)], 'ok');
+  logAction('best_mode', { best: best.mode, score: best });
+  saveSnapshot(`best_mode_${best.mode}`);
 }
 
 function displayResult() {
   if (lastResult.cuts.length || lastResult.undone.length) {
     render(lastResult);
     toast('Результат отображён.', 'ok');
+    logAction('display_result');
     return;
   }
   calc(lastMode);
@@ -651,17 +734,22 @@ function init() {
   clearResults();
 }
 
-$('addStock').onclick = () => { addRow('stockTable', '', '', true); clearResults(); };
-$('addPart').onclick = () => { addRow('partsTable', '', '', true); clearResults(); };
+$('addStock').onclick = () => { addRow('stockTable', '', '', true); clearResults(); logAction('add_stock_row'); };
+$('addPart').onclick = () => { addRow('partsTable', '', '', true); clearResults(); logAction('add_part_row'); };
 $('calcDP').onclick = () => calc('dp');
 $('calcLP').onclick = () => calc('lp');
 $('display').onclick = displayResult;
 $('btnReset').onclick = () => {
-  if (confirm('Сбросить страницу и очистить текущие данные?')) location.reload();
+  if (confirm('Сбросить страницу и очистить текущие данные?')) {
+    logAction('reset_page');
+    location.reload();
+  }
 };
-$('checkInput').onclick = validateBeforeCalc;
+$('checkInput').onclick = () => { const ok = validateBeforeCalc(); logAction('check_input', { ok }); };
 $('compareModes').onclick = compareModes;
 $('bestMode').onclick = bestMode;
+$('saveDb').onclick = () => saveToDatabase('manual_button').catch(() => {});
+$('dbHistory').onclick = () => showDbHistory().catch(() => {});
 $('clearAll').onclick = () => {
   if (!confirm('Очистить все введённые данные и результат?')) return;
   $('stockTable').querySelector('tbody').replaceChildren();
@@ -670,18 +758,21 @@ $('clearAll').onclick = () => {
   addRow('partsTable');
   clearResults();
   toast('Данные очищены.', 'warn');
+  logAction('clear_all');
+  saveSnapshot('clear_all');
 };
-$('clearSolution').onclick = clearResults;
+$('clearSolution').onclick = () => { clearResults(); logAction('clear_solution'); };
 $('clearDiagram').onclick = () => {
   $('diagramBox').replaceChildren();
   $('diagramFooter').textContent = '';
   toast('Графика убрана.', 'warn');
+  logAction('clear_diagram');
 };
-$('btnPrint').onclick = $('exportPdf').onclick = () => window.print();
+$('btnPrint').onclick = $('exportPdf').onclick = () => { logAction('print_pdf'); window.print(); };
 $('createReport').onclick = report;
 $('btnSave').onclick = save;
-$('btnOpen').onclick = () => $('fileOpen').click();
-$('btnTheme').onclick = toggleTheme;
+$('btnOpen').onclick = () => { logAction('open_project_dialog'); $('fileOpen').click(); };
+$('btnTheme').onclick = () => { toggleTheme(); logAction('toggle_theme', { theme: document.body.classList.contains('light-theme') ? 'light' : 'dark' }); };
 $('fileOpen').onchange = e => {
   const f = e.target.files[0];
   if (!f) return;
@@ -694,7 +785,7 @@ $('fileOpen').onchange = e => {
   r.onerror = () => toast('Не удалось прочитать файл.', 'err');
   r.readAsText(f);
 };
-$('btnAbout').onclick = () => toast('LinRaskrLP Local: автономный расчёт раскроя без Excel и макросов.', 'ok', 4200);
+$('btnAbout').onclick = () => { toast('LinRaskrLP Local: автономный расчёт раскроя без Excel и макросов.', 'ok', 4200); logAction('about'); };
 
 document.addEventListener('keydown', e => {
   if (e.ctrlKey && e.key === 'Enter') {
@@ -715,6 +806,9 @@ document.addEventListener('input', e => {
   if (e.target.matches('input,select')) clearResults();
 });
 document.addEventListener('change', e => {
-  if (e.target.matches('input,select') && e.target.id !== 'fileOpen') clearResults();
+  if (e.target.matches('input,select') && e.target.id !== 'fileOpen') {
+    clearResults();
+    logAction('change_input', { id: e.target.id || '', value: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
+  }
 });
 init();

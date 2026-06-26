@@ -1,7 +1,36 @@
 services:
+  linraskrlp_db:
+    image: mariadb:10.11
+    container_name: linraskrlp_db
+    environment:
+      MARIADB_DATABASE: linraskrlp
+      MARIADB_USER: linraskrlp
+      MARIADB_PASSWORD: linraskrlp_pass
+      MARIADB_ROOT_PASSWORD: linraskrlp_root_pass
+    volumes:
+      - linraskrlp_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   linraskrlp:
     build: .
     container_name: linraskrlp
+    depends_on:
+      linraskrlp_db:
+        condition: service_healthy
+    environment:
+      DB_HOST: linraskrlp_db
+      DB_PORT: 3306
+      DB_NAME: linraskrlp
+      DB_USER: linraskrlp
+      DB_PASSWORD: linraskrlp_pass
     ports:
-      - "8081:80"
+      - "8081:3000"
     restart: unless-stopped
+
+volumes:
+  linraskrlp_db_data:

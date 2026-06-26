@@ -63,7 +63,7 @@ body.light-theme button,body.light-theme .top-actions button,body.light-theme .b
 }
 body.light-theme #checkInput,body.light-theme #compareModes,body.light-theme #bestMode{background:linear-gradient(#fff7d6,#ffe9a3);color:#111827}
 body.light-theme #calcDP,body.light-theme #calcLP,body.light-theme #display{background:linear-gradient(#e0f2fe,#bae6fd);color:#0c4a6e}
-body.light-theme #btnSave,body.light-theme #createReport,body.light-theme #exportPdf,body.light-theme #btnPrint{background:linear-gradient(#dcfce7,#bbf7d0);color:#14532d}
+body.light-theme #btnSave,body.light-theme #createReport,body.light-theme #exportPdf,body.light-theme #btnPrint,body.light-theme #saveDb,body.light-theme #dbHistory{background:linear-gradient(#dcfce7,#bbf7d0);color:#14532d}
 body.light-theme #clearAll,body.light-theme #clearSolution,body.light-theme #clearDiagram,body.light-theme #btnReset{background:linear-gradient(#fee2e2,#fecaca);color:#7f1d1d}
 body.light-theme .cards div,body.light-theme .cut-label,body.light-theme .diagram-bar{background:#fff;color:#0f172a;border-color:#d1d5db}
 body.light-theme .cards b{color:#0f172a}
@@ -102,7 +102,7 @@ button,.top-actions button,.buttons button,button.small{
 button:hover{filter:brightness(1.12)}
 #checkInput,#compareModes,#bestMode{background:#3f2d10;border-color:#f59e0b;color:#fde68a}
 #calcDP,#calcLP,#display{background:#0c4a6e;border-color:#38bdf8;color:#e0f2fe}
-#btnSave,#createReport,#exportPdf,#btnPrint{background:#14532d;border-color:#22c55e;color:#dcfce7}
+#btnSave,#createReport,#exportPdf,#btnPrint,#saveDb,#dbHistory{background:#14532d;border-color:#22c55e;color:#dcfce7}
 #clearAll,#clearSolution,#clearDiagram,#btnReset{background:#7f1d1d;border-color:#ef4444;color:#fee2e2}
 
 .sheet{
